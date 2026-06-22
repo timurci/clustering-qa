@@ -11,7 +11,10 @@ authors = [
     { name = "Timur Çakmakoğlu", email = "timurcakmakoglu@gmail.com" }
 ]
 dependencies = [
-    "kedro~=1.4.0"
+    "kedro~=1.4.0",
+    "kedro-datasets>=9.4.0",
+    "kedro-viz>=12.4.0",
+    "polars>=1.41.2",
 ]
 
 [project.scripts]
