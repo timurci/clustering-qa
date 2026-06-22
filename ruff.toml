@@ -1,0 +1,29 @@
+line-length = 88
+show-fixes = true
+
+[format]
+docstring-code-format = true
+
+[lint]
+select = ["ALL"]
+ignore = ["COM812"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.per-file-ignores]
+"tests/**" = [
+    "S101",  # prevent usage of assert
+    "D102",  # missing docstring for public function
+    "ANN201",  # missing return type annotation for public function
+    "SLF001",  # testing framework protected methods (e.g. Kedro dataset hooks)
+    "PLR2004",  # magic numbers in test assertions are fine
+]
+
+"docs/**" = [
+    "ALL"
+]
+
+"src/clustering_qa/settings.py" = [
+    "ERA001"  # found commented-out code
+]

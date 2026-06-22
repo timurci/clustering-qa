@@ -1,0 +1,69 @@
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[project]
+requires-python = ">=3.10"
+name = "clustering_qa"
+readme = "README.md"
+version = "0.1.0"
+authors = [
+    { name = "Timur Çakmakoğlu", email = "timurcakmakoglu@gmail.com" }
+]
+dependencies = [
+    "kedro~=1.4.0"
+]
+
+[project.scripts]
+"clustering-qa" = "clustering_qa.__main__:main"
+
+[project.entry-points."kedro.hooks"]
+
+[project.optional-dependencies]
+docs = [
+    "docutils<0.21",
+    "sphinx>=5.3,<7.3",
+    "sphinx_rtd_theme==2.0.0",
+    "nbsphinx==0.8.1",
+    "sphinx-autodoc-typehints==1.20.2",
+    "sphinx_copybutton==0.5.2",
+    "ipykernel>=5.3, <7.0",
+    "Jinja2<3.2.0",
+    "myst-parser>=1.0,<2.1"
+]
+notebook = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=3,<7",
+    "pytest-mock>=1.7.1, <2.0",
+    "pytest~=7.2",
+    "ruff>=0.12.0",
+    "ty>=0.0.51",
+]
+
+[tool.kedro]
+package_name = "clustering_qa"
+project_name = "clustering-qa"
+kedro_init_version = "1.4.0"
+tools = "['Linting', 'Testing', 'Custom Logging', 'Documentation', 'Data Structure']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.pytest.ini_options]
+addopts = """
+--cov-report term-missing \
+--cov src/clustering_qa -ra"""
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "^\\s*\\.\\.\\.\\s*$",  # Protocol / abstract method placeholders
+]
