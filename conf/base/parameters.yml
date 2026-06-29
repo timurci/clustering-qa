@@ -1,3 +1,8 @@
+partition_ids:
+  - part1
+  - part2
+  - part3
+
 clustering_stability:
   n_trials: 5
-  n_clusters: 4
+  n_clusters: 5
