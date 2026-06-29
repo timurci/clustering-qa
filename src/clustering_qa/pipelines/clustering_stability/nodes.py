@@ -14,7 +14,9 @@ def kmeans_clustering(
     embeddings: Embeddings, n_clusters: int, seed: int | None = None
 ) -> EmbeddingLabels:
     """Performs K-means clustering on the given embeddings."""
-    model = KMeans(n_clusters=n_clusters, random_state=seed).fit(embeddings.data)
+    model = KMeans(n_clusters=n_clusters, random_state=seed).fit(
+        embeddings.data.drop("sample_id")
+    )
     labels: list[str] = [str(label) for label in model.labels_.tolist()]
     labels_df = pl.DataFrame(
         {"sample_id": embeddings.data["sample_id"], "label": labels},
