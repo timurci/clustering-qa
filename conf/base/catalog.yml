@@ -2,3 +2,8 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
+
+raw_clustering_embeddings:
+  type: partitions.PartitionedDataset
+  path: data/01_raw/clustering_embeddings
+  dataset: clustering_qa.datasets.embedding.EmbeddingsDataset
