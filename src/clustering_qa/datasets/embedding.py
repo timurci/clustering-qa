@@ -1,6 +1,7 @@
 """Dataset definitions for embedding."""
 
 from dataclasses import dataclass
+from typing import Any
 
 import polars as pl
 from kedro.io import AbstractDataset
@@ -32,7 +33,9 @@ class EmbeddingLabels:
             object.__setattr__(
                 self,
                 "data",
-                self.data.with_columns(pl.col("label").cast(pl.Categorical)),
+                self.data.with_columns(
+                    pl.col("label").cast(pl.Utf8).cast(pl.Categorical)
+                ),
             )
 
 
@@ -59,6 +62,9 @@ class EmbeddingsDataset(AbstractDataset[Embeddings, Embeddings]):
         """Saves the embedded dataset to the given filepath."""
         data.data.write_parquet(self._filepath, compression="zstd", compression_level=5)
 
+    def _describe(self) -> dict[str, Any]:
+        return {"filepath": self._filepath}
+
 
 class EmbeddingLabelsDataset(AbstractDataset):
     """Loader for Embedding Labels."""
@@ -75,3 +81,6 @@ class EmbeddingLabelsDataset(AbstractDataset):
     def save(self, data: pl.DataFrame) -> None:
         """Saves the embedding labels to the given filepath."""
         data.write_parquet(self._filepath, compression="zstd", compression_level=5)
+
+    def _describe(self) -> dict[str, Any]:
+        return {"filepath": self._filepath}

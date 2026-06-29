@@ -3,7 +3,17 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
 
-raw_clustering_embeddings:
-  type: partitions.PartitionedDataset
-  path: data/01_raw/clustering_embeddings
-  dataset: clustering_qa.datasets.embedding.EmbeddingsDataset
+# Per-partition / per-trial dataset factory patterns.
+# The pipeline uses `__` as the separator (instead of `.`) to avoid the
+# Kedro-reserved dot-notation namespacing and to make the dataset factory
+# patterns below unambiguous.
+"raw_clustering_embeddings__{pid}":
+  type: clustering_qa.datasets.embedding.EmbeddingsDataset
+  filepath: data/01_raw/clustering_embeddings/{pid}.parquet
+
+"intermediate_clustering_labels__{pid}__trial_{trial}":
+  type: MemoryDataset
+
+"clustering_stability_metrics__{pid}":
+  type: json.JSONDataset
+  filepath: data/08_reporting/clustering_stability_metrics/{pid}.json

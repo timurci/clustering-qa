@@ -74,3 +74,6 @@ exclude_also = [
     "if TYPE_CHECKING:",
     "^\\s*\\.\\.\\.\\s*$",  # Protocol / abstract method placeholders
 ]
+
+[tool.kedro_telemetry]
+project_id = "6f834ac067a9443a844d3e9144c2c076"

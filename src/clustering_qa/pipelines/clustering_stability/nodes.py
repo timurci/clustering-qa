@@ -15,7 +15,7 @@ def kmeans_clustering(
 ) -> EmbeddingLabels:
     """Performs K-means clustering on the given embeddings."""
     model = KMeans(n_clusters=n_clusters, random_state=seed).fit(embeddings.data)
-    labels: list[int] = model.labels_.tolist()
+    labels: list[str] = [str(label) for label in model.labels_.tolist()]
     labels_df = pl.DataFrame(
         {"sample_id": embeddings.data["sample_id"], "label": labels},
         schema={
@@ -34,7 +34,6 @@ def assess_stability(*trials: EmbeddingLabels) -> ClusterLabelScore:
     """
 
     def score(trial1: EmbeddingLabels, trial2: EmbeddingLabels) -> ClusterLabelScore:
-
         ari = adjusted_rand_score(trial1.data["label"], trial2.data["label"])
         nmi = normalized_mutual_info_score(trial1.data["label"], trial2.data["label"])
         return {"ari": ari, "nmi": nmi}
