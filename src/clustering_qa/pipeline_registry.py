@@ -23,8 +23,12 @@ def register_pipelines() -> dict[str, Pipeline]:
         partition_ids=parameters["partition_ids"],
         n_trials=parameters["clustering_stability"]["n_trials"],
     )
+    clustering_agreement = pipelines.clustering_agreement.create_pipeline(
+        partition_ids=parameters["partition_ids"],
+    )
     pipeline_dict: dict[str, Pipeline] = {
         "clustering_stability": clustering_stability,
-        "__default__": clustering_stability,
+        "clustering_agreement": clustering_agreement,
+        "__default__": clustering_stability + clustering_agreement,
     }
     return pipeline_dict

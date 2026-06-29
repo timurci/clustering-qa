@@ -8,8 +8,16 @@
 # Kedro-reserved dot-notation namespacing and to make the dataset factory
 # patterns below unambiguous.
 "raw_clustering_embeddings__{pid}":
-  type: clustering_qa.datasets.embedding.EmbeddingsDataset
+  type: clustering_qa.datasets.feature_table.FeatureTableDataset
   filepath: data/01_raw/clustering_embeddings/{pid}.parquet
+
+"raw_clustering_features__{pid}":
+  type: clustering_qa.datasets.feature_table.FeatureTableDataset
+  filepath: data/01_raw/clustering_features/{pid}.parquet
+
+"raw_clustering_labels__{pid}":
+  type: clustering_qa.datasets.feature_table.SampleLabelsDataset
+  filepath: data/01_raw/clustering_labels/{pid}.csv
 
 "intermediate_clustering_labels__{pid}__trial_{trial}":
   type: MemoryDataset
@@ -17,3 +25,11 @@
 "clustering_stability_metrics__{pid}":
   type: json.JSONDataset
   filepath: data/08_reporting/clustering_stability_metrics/{pid}.json
+
+"feature_significance__{pid}":
+  type: clustering_qa.datasets.feature_significance.FeatureSignificanceDataset
+  filepath: data/08_reporting/feature_significance/{pid}.csv
+
+"clustering_agreement_features":
+  type: json.JSONDataset
+  filepath: data/08_reporting/clustering_agreement_features.json

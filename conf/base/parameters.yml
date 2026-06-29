@@ -5,3 +5,6 @@ partition_ids:
 clustering_stability:
   n_trials: 5
   n_clusters: 5
+
+clustering_agreement:
+  p_adj_threshold: 0.05

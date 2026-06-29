@@ -7,35 +7,38 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 
 from clustering_qa.datasets.clustering import ClusterLabelScore
-from clustering_qa.datasets.embedding import EmbeddingLabels, Embeddings
+from clustering_qa.datasets.feature_table import FeatureTable, SampleLabels
 
 
 def kmeans_clustering(
-    embeddings: Embeddings, n_clusters: int, seed: int | None = None
-) -> EmbeddingLabels:
-    """Performs K-means clustering on the given embeddings."""
+    features: FeatureTable, n_clusters: int, seed: int | None = None
+) -> SampleLabels:
+    """Performs K-means clustering on the given feature table."""
     model = KMeans(n_clusters=n_clusters, random_state=seed).fit(
-        embeddings.data.drop("sample_id")
+        features.data.drop(features.id_column)
     )
     labels: list[str] = [str(label) for label in model.labels_.tolist()]
     labels_df = pl.DataFrame(
-        {"sample_id": embeddings.data["sample_id"], "label": labels},
+        {
+            features.id_column: features.data[features.id_column],
+            "label": labels,
+        },
         schema={
-            "sample_id": embeddings.data.schema["sample_id"],
+            features.id_column: features.data.schema[features.id_column],
             "label": pl.Categorical,
         },
     )
-    return EmbeddingLabels(data=labels_df)
+    return SampleLabels(data=labels_df)
 
 
-def assess_stability(*trials: EmbeddingLabels) -> ClusterLabelScore:
+def assess_stability(*trials: SampleLabels) -> ClusterLabelScore:
     """Assesses the stability of clustering trials by comparing their labels.
 
     Returns:
         Pairwise mean ARI and NMI scores across multiple clustering trials.
     """
 
-    def score(trial1: EmbeddingLabels, trial2: EmbeddingLabels) -> ClusterLabelScore:
+    def score(trial1: SampleLabels, trial2: SampleLabels) -> ClusterLabelScore:
         ari = adjusted_rand_score(trial1.data["label"], trial2.data["label"])
         nmi = normalized_mutual_info_score(trial1.data["label"], trial2.data["label"])
         return {"ari": ari, "nmi": nmi}
