@@ -1,6 +1,6 @@
 """Dataset definitions for feature significance scores."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, ClassVar
 
 import polars as pl
@@ -13,7 +13,6 @@ from clustering_qa.datasets.base import AnnotatedDataFrame
 class FeatureSignificance(AnnotatedDataFrame):
     """Represents per-feature significance scores from a Kruskal-Wallis test."""
 
-    id_column: str = field(default="feature")
     required_columns: ClassVar[tuple[str, ...]] = ("feature", "p_value", "p_adj")
 
 

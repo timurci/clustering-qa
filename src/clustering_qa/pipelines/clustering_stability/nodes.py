@@ -15,16 +15,16 @@ def kmeans_clustering(
 ) -> SampleLabels:
     """Performs K-means clustering on the given feature table."""
     model = KMeans(n_clusters=n_clusters, random_state=seed).fit(
-        features.data.drop(features.id_column)
+        features.data.drop("sample_id")
     )
     labels: list[str] = [str(label) for label in model.labels_.tolist()]
     labels_df = pl.DataFrame(
         {
-            features.id_column: features.data[features.id_column],
+            "sample_id": features.data["sample_id"],
             "label": labels,
         },
         schema={
-            features.id_column: features.data.schema[features.id_column],
+            "sample_id": features.data.schema["sample_id"],
             "label": pl.Categorical,
         },
     )

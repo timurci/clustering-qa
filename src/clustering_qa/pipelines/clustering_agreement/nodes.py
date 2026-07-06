@@ -30,14 +30,12 @@ def kruskal_wallis_per_feature(
         A :class:`FeatureSignificance` with columns ``feature``, ``p_value``,
         and ``p_adj``.
     """
-    joined = features.data.join(labels.data, on=features.id_column, how="inner")
+    joined = features.data.join(labels.data, on="sample_id", how="inner")
     if joined.is_empty():
         msg = "inner join of features and labels produced no rows"
         raise ValueError(msg)
 
-    feature_columns = [
-        col for col in features.data.columns if col != features.id_column
-    ]
+    feature_columns = [col for col in features.data.columns if col != "sample_id"]
     p_values = np.array([_kruskal_pvalue(joined, col) for col in feature_columns])
 
     return FeatureSignificance(

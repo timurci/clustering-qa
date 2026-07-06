@@ -10,14 +10,17 @@
 "raw_clustering_embeddings__{pid}":
   type: clustering_qa.datasets.feature_table.FeatureTableDataset
   filepath: data/01_raw/clustering_embeddings/{pid}.parquet
+  id_column: sample_id
 
 "raw_clustering_features__{pid}":
   type: clustering_qa.datasets.feature_table.FeatureTableDataset
   filepath: data/01_raw/clustering_features/{pid}.parquet
+  id_column: sample_id
 
 "raw_clustering_labels__{pid}":
   type: clustering_qa.datasets.feature_table.SampleLabelsDataset
   filepath: data/01_raw/clustering_labels/{pid}.csv
+  id_column: sample_id
 
 "intermediate_clustering_labels__{pid}__trial_{trial}":
   type: MemoryDataset
