@@ -1,6 +1,7 @@
 """Unit tests for the clustering_agreement pipeline nodes."""
 
 import math
+import warnings
 
 import numpy as np
 import polars as pl
@@ -121,6 +122,52 @@ class TestKruskalWallisPerFeature:
         result = kruskal_wallis_per_feature(features, labels)
         for p in result.data["p_value"].to_list():
             assert math.isnan(p)
+
+    def test_n_features_limits_to_first_columns(self) -> None:
+        rng = np.random.default_rng(7)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        result = kruskal_wallis_per_feature(features, labels, n_features=2)
+        assert result.data["feature"].to_list() == ["separable", "noisy"]
+
+    def test_n_features_none_tests_all(self) -> None:
+        rng = np.random.default_rng(8)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        result = kruskal_wallis_per_feature(features, labels, n_features=None)
+        assert result.data["feature"].to_list() == ["separable", "noisy", "constant"]
+
+    def test_n_features_warns_when_truncating(self) -> None:
+        rng = np.random.default_rng(9)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        with pytest.warns(UserWarning, match="n_features=2 limits testing"):
+            result = kruskal_wallis_per_feature(features, labels, n_features=2)
+        assert result.data.shape[0] == 2
+
+    def test_n_features_larger_than_total_does_not_warn(self) -> None:
+        rng = np.random.default_rng(10)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = kruskal_wallis_per_feature(features, labels, n_features=10)
+        assert result.data["feature"].to_list() == ["separable", "noisy", "constant"]
+        assert not any("n_features" in str(w.message) for w in caught)
+
+    def test_negative_n_features_raises(self) -> None:
+        rng = np.random.default_rng(11)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        with pytest.raises(ValueError, match="n_features must be positive"):
+            kruskal_wallis_per_feature(features, labels, n_features=-1)
+
+    def test_zero_n_features_raises(self) -> None:
+        rng = np.random.default_rng(11)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        with pytest.raises(ValueError, match="n_features must be positive"):
+            kruskal_wallis_per_feature(features, labels, n_features=0)
 
 
 class TestIntersectSignificantFeatures:

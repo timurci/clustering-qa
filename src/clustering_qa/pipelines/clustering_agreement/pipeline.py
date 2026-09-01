@@ -22,6 +22,7 @@ def create_pipeline(partition_ids: list[str]) -> Pipeline:
             inputs=[
                 f"raw_clustering_features__{pid}",
                 f"raw_clustering_labels__{pid}",
+                "params:clustering_agreement.n_features",
             ],
             outputs=f"feature_significance__{pid}",
         )

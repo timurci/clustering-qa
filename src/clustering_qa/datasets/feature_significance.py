@@ -1,12 +1,15 @@
 """Dataset definitions for feature significance scores."""
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, ClassVar
 
 import polars as pl
 from kedro.io import AbstractDataset
 
 from clustering_qa.datasets.base import AnnotatedDataFrame
+
+CSV_FLOAT_PRECISION = 3
 
 
 @dataclass(frozen=True)
@@ -32,7 +35,8 @@ class FeatureSignificanceDataset(
 
     def save(self, data: FeatureSignificance) -> None:
         """Saves the feature significance scores to the given filepath."""
-        data.data.write_csv(self._filepath)
+        Path(self._filepath).parent.mkdir(parents=True, exist_ok=True)
+        data.data.write_csv(self._filepath, float_precision=CSV_FLOAT_PRECISION)
 
     def _describe(self) -> dict[str, Any]:
         return {"filepath": self._filepath}

@@ -1,10 +1,13 @@
 partition_ids:
-  - part1
-  - part2
+  - rosmap_train
+  - gse_train
+  - mayo_train
+  - msbb_phg_train
 
 clustering_stability:
   n_trials: 5
-  n_clusters: 5
+  n_clusters: 20
 
 clustering_agreement:
   p_adj_threshold: 0.05
+  n_features: 1000 # null = test all features; set a small value for smoke tests

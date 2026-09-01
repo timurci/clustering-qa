@@ -46,6 +46,36 @@ class TestFeatureSignificanceDataset:
         assert loaded.data["p_value"].to_list() == [0.001, 0.04, 0.6]
         assert loaded.data["p_adj"].to_list() == [0.003, 0.12, 0.6]
 
+    def test_save_creates_parent_directories(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "nested" / "dir" / "scores.csv"
+        dataset = FeatureSignificanceDataset(str(filepath))
+        dataset.save(_make_scores())
+        loaded = dataset.load()
+        assert loaded.data.columns == ["feature", "p_value", "p_adj"]
+
+    def test_save_limits_float_precision(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "scores.csv"
+        dataset = FeatureSignificanceDataset(str(filepath))
+        original = FeatureSignificance(
+            data=pl.DataFrame(
+                {
+                    "feature": ["a", "b"],
+                    "p_value": [0.00123456789, 0.000987654321],
+                    "p_adj": [0.00543210987, 0.000043210987],
+                }
+            )
+        )
+        dataset.save(original)
+        loaded = dataset.load()
+        assert loaded.data["p_value"].to_list() == [
+            round(0.00123456789, 3),
+            round(0.000987654321, 3),
+        ]
+        assert loaded.data["p_adj"].to_list() == [
+            round(0.00543210987, 3),
+            round(0.000043210987, 3),
+        ]
+
     def test_describe(self, tmp_path: Path) -> None:
         filepath = str(tmp_path / "scores.csv")
         dataset = FeatureSignificanceDataset(filepath)

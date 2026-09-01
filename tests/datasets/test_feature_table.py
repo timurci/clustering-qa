@@ -74,6 +74,13 @@ class TestFeatureTableDataset:
         assert loaded.data.columns == ["sample_id", "x", "y"]
         assert loaded.data["sample_id"].to_list() == ["a", "b", "c"]
 
+    def test_save_creates_parent_directories(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "nested" / "dir" / "features.parquet"
+        dataset = FeatureTableDataset(str(filepath), id_column="sample_id")
+        dataset.save(_make_feature_table())
+        loaded = dataset.load()
+        assert loaded.data.columns == ["sample_id", "x", "y"]
+
     def test_describe(self, tmp_path: Path) -> None:
         filepath = str(tmp_path / "features.parquet")
         dataset = FeatureTableDataset(filepath, id_column="sample_id")
@@ -119,6 +126,13 @@ class TestSampleLabelsDataset:
         loaded = dataset.load()
         assert loaded.data.columns == ["sample_id", "label"]
         assert loaded.data["sample_id"].to_list() == ["a", "b", "c"]
+
+    def test_save_creates_parent_directories(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "nested" / "dir" / "labels.csv"
+        dataset = SampleLabelsDataset(str(filepath), id_column="sample_id")
+        dataset.save(_make_labels())
+        loaded = dataset.load()
+        assert loaded.data.columns == ["sample_id", "label"]
 
     def test_describe(self, tmp_path: Path) -> None:
         filepath = str(tmp_path / "labels.csv")

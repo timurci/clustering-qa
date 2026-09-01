@@ -28,6 +28,7 @@ class TestCreatePipeline:
             assert list(node.inputs) == [
                 f"raw_clustering_features__{pid}",
                 f"raw_clustering_labels__{pid}",
+                "params:clustering_agreement.n_features",
             ]
 
         intersection_node = by_output["clustering_agreement_features"]

@@ -1,6 +1,7 @@
 """Dataset definitions for feature tables and sample labels."""
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, ClassVar
 
 import polars as pl
@@ -68,6 +69,7 @@ class FeatureTableDataset(AbstractDataset[FeatureTable, FeatureTable]):
 
     def save(self, data: FeatureTable) -> None:
         """Saves the feature table to the given filepath."""
+        Path(self._filepath).parent.mkdir(parents=True, exist_ok=True)
         data.data.write_parquet(self._filepath, compression="zstd", compression_level=5)
 
     def _describe(self) -> dict[str, Any]:
@@ -93,6 +95,7 @@ class SampleLabelsDataset(AbstractDataset[SampleLabels, SampleLabels]):
 
     def save(self, data: SampleLabels) -> None:
         """Saves the sample labels to the given filepath."""
+        Path(self._filepath).parent.mkdir(parents=True, exist_ok=True)
         data.data.write_csv(self._filepath)
 
     def _describe(self) -> dict[str, Any]:
