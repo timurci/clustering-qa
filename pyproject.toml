@@ -20,6 +20,7 @@ dependencies = [
 
 [project.scripts]
 "clustering-qa" = "clustering_qa.__main__:main"
+"partition-features" = "clustering_qa.tools.partition:main"
 
 [project.entry-points."kedro.hooks"]
 

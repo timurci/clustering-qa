@@ -3,11 +3,14 @@ partition_ids:
   - gse_train
   - mayo_train
   - msbb_phg_train
+  - msbb_fp_train
+  - msbb_ifg_train
+  - msbb_stg_train
 
 clustering_stability:
-  n_trials: 5
-  n_clusters: 20
+  n_trials: 20
+  n_clusters: 5
 
 clustering_agreement:
   p_adj_threshold: 0.05
-  n_features: 1000 # null = test all features; set a small value for smoke tests
+  n_features: null # null = test all features; set a small value for smoke tests

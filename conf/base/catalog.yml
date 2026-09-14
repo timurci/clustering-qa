@@ -21,6 +21,7 @@
   type: clustering_qa.datasets.feature_table.SampleLabelsDataset
   filepath: data/01_raw/clustering_labels/{pid}.csv
   id_column: specimen_id
+  label_column: label_pred
 
 "intermediate_clustering_labels__{pid}__trial_{trial}":
   type: MemoryDataset

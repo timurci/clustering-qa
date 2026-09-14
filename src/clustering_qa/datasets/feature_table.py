@@ -22,6 +22,19 @@ class IdColumnNotFoundError(Exception):
         )
 
 
+class LabelColumnNotFoundError(Exception):
+    """Raised when the configured label column is not found in the loaded data."""
+
+    def __init__(self, label_column: str, available_columns: list[str]) -> None:
+        """Store the missing column and the columns that were available."""
+        self.label_column = label_column
+        self.available_columns = available_columns
+        super().__init__(
+            f"label_column '{label_column}' not found; "
+            f"available columns: {available_columns}"
+        )
+
+
 @dataclass(frozen=True)
 class FeatureTable(AnnotatedDataFrame):
     """Represents a sample-by-feature table."""
@@ -79,10 +92,13 @@ class FeatureTableDataset(AbstractDataset[FeatureTable, FeatureTable]):
 class SampleLabelsDataset(AbstractDataset[SampleLabels, SampleLabels]):
     """Loader for SampleLabels."""
 
-    def __init__(self, filepath: str, id_column: str) -> None:
-        """Initializes the SampleLabelsDataset with the given filepath and id column."""
+    def __init__(
+        self, filepath: str, id_column: str, label_column: str = "label"
+    ) -> None:
+        """Initializes the SampleLabelsDataset with filepath, id and label columns."""
         self._filepath = filepath
         self._id_column = id_column
+        self._label_column = label_column
 
     def load(self) -> SampleLabels:
         """Loads the sample labels from the given filepath."""
@@ -90,7 +106,13 @@ class SampleLabelsDataset(AbstractDataset[SampleLabels, SampleLabels]):
         if self._id_column not in df.columns:
             exc = IdColumnNotFoundError(self._id_column, df.columns)
             raise DatasetError(str(exc)) from exc
-        df = df.rename({self._id_column: "sample_id"})
+        if self._label_column not in df.columns:
+            exc = LabelColumnNotFoundError(self._label_column, df.columns)
+            raise DatasetError(str(exc)) from exc
+        rename_map = {self._id_column: "sample_id"}
+        if self._label_column != "label":
+            rename_map[self._label_column] = "label"
+        df = df.rename(rename_map)
         return SampleLabels(data=df)
 
     def save(self, data: SampleLabels) -> None:
@@ -99,4 +121,8 @@ class SampleLabelsDataset(AbstractDataset[SampleLabels, SampleLabels]):
         data.data.write_csv(self._filepath)
 
     def _describe(self) -> dict[str, Any]:
-        return {"filepath": self._filepath, "id_column": self._id_column}
+        return {
+            "filepath": self._filepath,
+            "id_column": self._id_column,
+            "label_column": self._label_column,
+        }

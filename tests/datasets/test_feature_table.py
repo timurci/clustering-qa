@@ -10,6 +10,7 @@ from clustering_qa.datasets.feature_table import (
     FeatureTable,
     FeatureTableDataset,
     IdColumnNotFoundError,
+    LabelColumnNotFoundError,
     SampleLabels,
     SampleLabelsDataset,
 )
@@ -137,7 +138,22 @@ class TestSampleLabelsDataset:
     def test_describe(self, tmp_path: Path) -> None:
         filepath = str(tmp_path / "labels.csv")
         dataset = SampleLabelsDataset(filepath, id_column="sample_id")
-        assert dataset._describe() == {"filepath": filepath, "id_column": "sample_id"}
+        assert dataset._describe() == {
+            "filepath": filepath,
+            "id_column": "sample_id",
+            "label_column": "label",
+        }
+
+    def test_describe_includes_custom_label_column(self, tmp_path: Path) -> None:
+        filepath = str(tmp_path / "labels.csv")
+        dataset = SampleLabelsDataset(
+            filepath, id_column="specimen_id", label_column="label_pred"
+        )
+        assert dataset._describe() == {
+            "filepath": filepath,
+            "id_column": "specimen_id",
+            "label_column": "label_pred",
+        }
 
     def test_renames_custom_id_column(self, tmp_path: Path) -> None:
         filepath = tmp_path / "labels.csv"
@@ -167,3 +183,36 @@ class TestSampleLabelsDataset:
         assert isinstance(exc_info.value.__cause__, IdColumnNotFoundError)
         assert exc_info.value.__cause__.id_column == "subject_id"
         assert exc_info.value.__cause__.available_columns == ["label"]
+
+    def test_renames_custom_label_column(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "labels.csv"
+        pl.DataFrame(
+            {
+                "specimen_id": ["a", "b", "c"],
+                "label_pred": ["0", "1", "0"],
+            }
+        ).write_csv(filepath)
+        dataset = SampleLabelsDataset(
+            str(filepath), id_column="specimen_id", label_column="label_pred"
+        )
+        loaded = dataset.load()
+        assert loaded.data.columns == ["sample_id", "label"]
+        assert "label_pred" not in loaded.data.columns
+        assert loaded.data["sample_id"].to_list() == ["a", "b", "c"]
+        assert loaded.data.schema["label"] == pl.Categorical
+
+    def test_missing_label_column_raises(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "labels.csv"
+        pl.DataFrame(
+            {
+                "specimen_id": ["a", "b"],
+            }
+        ).write_csv(filepath)
+        dataset = SampleLabelsDataset(
+            str(filepath), id_column="specimen_id", label_column="label_pred"
+        )
+        with pytest.raises(DatasetError) as exc_info:
+            dataset.load()
+        assert isinstance(exc_info.value.__cause__, LabelColumnNotFoundError)
+        assert exc_info.value.__cause__.label_column == "label_pred"
+        assert exc_info.value.__cause__.available_columns == ["specimen_id"]
