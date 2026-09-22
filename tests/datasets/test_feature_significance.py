@@ -18,6 +18,7 @@ def _make_scores() -> FeatureSignificance:
                 "feature": ["a", "b", "c"],
                 "p_value": [0.001, 0.04, 0.6],
                 "p_adj": [0.003, 0.12, 0.6],
+                "eta_squared": [0.3, 0.02, 0.0],
             }
         )
     )
@@ -27,13 +28,13 @@ class TestFeatureSignificance:
     """Post-init validation for the :class:`FeatureSignificance` dataclass."""
 
     def test_missing_required_column_raises(self) -> None:
-        bad = pl.DataFrame({"feature": ["x"], "p_value": [0.5]})
-        with pytest.raises(AssertionError, match="p_adj"):
+        bad = pl.DataFrame({"feature": ["x"], "p_value": [0.5], "p_adj": [0.5]})
+        with pytest.raises(AssertionError, match="eta_squared"):
             FeatureSignificance(data=bad)
 
 
 class TestFeatureSignificanceDataset:
-    """Round-trip tests for :class:`FeatureSignificanceDataset`."""
+    """Round-trip tests for the :class:`FeatureSignificanceDataset`."""
 
     def test_save_and_load_round_trip(self, tmp_path: Path) -> None:
         filepath = tmp_path / "scores.csv"
@@ -41,17 +42,18 @@ class TestFeatureSignificanceDataset:
         original = _make_scores()
         dataset.save(original)
         loaded = dataset.load()
-        assert loaded.data.columns == ["feature", "p_value", "p_adj"]
+        assert loaded.data.columns == ["feature", "p_value", "p_adj", "eta_squared"]
         assert loaded.data["feature"].to_list() == ["a", "b", "c"]
         assert loaded.data["p_value"].to_list() == [0.001, 0.04, 0.6]
         assert loaded.data["p_adj"].to_list() == [0.003, 0.12, 0.6]
+        assert loaded.data["eta_squared"].to_list() == [0.3, 0.02, 0.0]
 
     def test_save_creates_parent_directories(self, tmp_path: Path) -> None:
         filepath = tmp_path / "nested" / "dir" / "scores.csv"
         dataset = FeatureSignificanceDataset(str(filepath))
         dataset.save(_make_scores())
         loaded = dataset.load()
-        assert loaded.data.columns == ["feature", "p_value", "p_adj"]
+        assert loaded.data.columns == ["feature", "p_value", "p_adj", "eta_squared"]
 
     def test_save_limits_float_precision(self, tmp_path: Path) -> None:
         filepath = tmp_path / "scores.csv"
@@ -62,6 +64,7 @@ class TestFeatureSignificanceDataset:
                     "feature": ["a", "b"],
                     "p_value": [0.00123456789, 0.000987654321],
                     "p_adj": [0.00543210987, 0.000043210987],
+                    "eta_squared": [0.123456789, 0.000987654321],
                 }
             )
         )
@@ -74,6 +77,10 @@ class TestFeatureSignificanceDataset:
         assert loaded.data["p_adj"].to_list() == [
             round(0.00543210987, 3),
             round(0.000043210987, 3),
+        ]
+        assert loaded.data["eta_squared"].to_list() == [
+            round(0.123456789, 3),
+            round(0.000987654321, 3),
         ]
 
     def test_describe(self, tmp_path: Path) -> None:

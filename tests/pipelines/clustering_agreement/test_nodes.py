@@ -10,8 +10,8 @@ import pytest
 from clustering_qa.datasets.feature_significance import FeatureSignificance
 from clustering_qa.datasets.feature_table import FeatureTable, SampleLabels
 from clustering_qa.pipelines.clustering_agreement.nodes import (
-    intersect_significant_features,
     kruskal_wallis_per_feature,
+    select_consensus_features,
 )
 
 
@@ -52,7 +52,12 @@ class TestKruskalWallisPerFeature:
         features = _make_feature_table(rng, n=200)
         labels = _make_labels(200)
         result = kruskal_wallis_per_feature(features, labels)
-        assert set(result.data.columns) == {"feature", "p_value", "p_adj"}
+        assert set(result.data.columns) == {
+            "feature",
+            "p_value",
+            "p_adj",
+            "eta_squared",
+        }
         assert result.data["feature"].to_list() == ["separable", "noisy", "constant"]
 
     def test_separable_feature_is_significant(self) -> None:
@@ -71,6 +76,51 @@ class TestKruskalWallisPerFeature:
         row = result.data.filter(pl.col("feature") == "constant")
         assert math.isnan(row["p_value"][0])
         assert math.isnan(row["p_adj"][0])
+        assert math.isnan(row["eta_squared"][0])
+
+    def test_eta_squared_orders_effects_and_is_bounded(self) -> None:
+        rng = np.random.default_rng(2)
+        features = _make_feature_table(rng, n=200)
+        labels = _make_labels(200)
+        result = kruskal_wallis_per_feature(features, labels)
+        eta = {row["feature"]: row["eta_squared"] for row in result.data.to_dicts()}
+        assert eta["separable"] > eta["noisy"]
+        for value in eta.values():
+            if not math.isnan(value):
+                assert 0.0 <= value <= 1.0
+
+    def test_constant_feature_is_nan_regardless_of_tie_rounding(self) -> None:
+        """Regression: constant features must be NaN for any group sizes.
+
+        scipy's tie correction divides h by a tie factor of exactly 0 for
+        constant input; the floating-point residue of the otherwise-zero h
+        then decides between NaN, +inf (p=0.0), and -inf (p=1.0). With
+        group sizes 25/25/31/24 (n=105) this used to yield p=0.0, which
+        passed the NaN check and entered the significant set.
+        """
+        rng = np.random.default_rng(12)
+        n = 105
+        features = FeatureTable(
+            data=pl.DataFrame(
+                {
+                    "sample_id": np.arange(n, dtype=np.uint32),
+                    "signal": rng.normal(size=n),
+                    "constant": np.zeros(n),
+                }
+            )
+        )
+        labels = SampleLabels(
+            data=pl.DataFrame(
+                {
+                    "sample_id": np.arange(n, dtype=np.uint32),
+                    "label": ["a"] * 25 + ["b"] * 25 + ["c"] * 31 + ["d"] * 24,
+                }
+            )
+        )
+        result = kruskal_wallis_per_feature(features, labels)
+        row = result.data.filter(pl.col("feature") == "constant")
+        assert math.isnan(row["p_value"][0])
+        assert math.isnan(row["eta_squared"][0])
 
     def test_adjusted_pvalues_are_monotone_ge_raw(self) -> None:
         rng = np.random.default_rng(3)
@@ -170,45 +220,58 @@ class TestKruskalWallisPerFeature:
             kruskal_wallis_per_feature(features, labels, n_features=0)
 
 
-class TestIntersectSignificantFeatures:
-    """Tests for the ``intersect_significant_features`` node function."""
+class TestSelectConsensusFeatures:
+    """Tests for the ``select_consensus_features`` node function."""
 
     @staticmethod
-    def _scores(
-        feature_padj: dict[str, float],
-    ) -> FeatureSignificance:
-        df = pl.DataFrame(
-            {
-                "feature": list(feature_padj),
-                "p_value": list(feature_padj.values()),
-                "p_adj": list(feature_padj.values()),
-            }
+    def _scores(rows: dict[str, tuple[float, float]]) -> FeatureSignificance:
+        """Builds scores from ``feature -> (p_adj, eta_squared)``."""
+        return FeatureSignificance(
+            data=pl.DataFrame(
+                {
+                    "feature": list(rows),
+                    "p_value": [p for p, _ in rows.values()],
+                    "p_adj": [p for p, _ in rows.values()],
+                    "eta_squared": [e for _, e in rows.values()],
+                }
+            )
         )
-        return FeatureSignificance(data=df)
 
-    def test_returns_sorted_intersection(self) -> None:
-        a = self._scores({"x": 0.01, "y": 0.04, "z": 0.2})
-        b = self._scores({"x": 0.001, "y": 0.5, "w": 0.02})
-        result = intersect_significant_features(0.05, a, b)
-        assert result == ["x"]
+    def test_selects_top_eta_per_partition_and_intersects(self) -> None:
+        a = self._scores({"x": (0.01, 0.5), "y": (0.01, 0.4), "z": (0.01, 0.1)})
+        b = self._scores({"x": (0.01, 0.3), "y": (0.01, 0.2), "w": (0.01, 0.9)})
+        # Top-2 per partition: a -> {x, y}; b -> {w, x}.
+        assert select_consensus_features(0.05, 2, a, b) == ["x"]
 
-    def test_threshold_one_returns_all_shared(self) -> None:
-        a = self._scores({"x": 0.5, "y": 0.9})
-        b = self._scores({"x": 0.6, "y": 0.7})
-        result = intersect_significant_features(1.0, a, b)
-        assert result == ["x", "y"]
+    def test_fdr_gate_excludes_nonsignificant(self) -> None:
+        a = self._scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
+        b = self._scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
+        assert select_consensus_features(0.05, 10, a, b) == ["x"]
+
+    def test_underfill_keeps_all_survivors(self) -> None:
+        a = self._scores({"x": (0.01, 0.5), "y": (0.02, 0.4)})
+        b = self._scores({"x": (0.01, 0.3), "y": (0.02, 0.2)})
+        assert select_consensus_features(0.05, 2000, a, b) == ["x", "y"]
 
     def test_threshold_zero_returns_empty(self) -> None:
-        a = self._scores({"x": 0.5})
-        b = self._scores({"x": 0.5})
-        result = intersect_significant_features(0.0, a, b)
-        assert result == []
+        a = self._scores({"x": (0.5, 0.5)})
+        b = self._scores({"x": (0.5, 0.5)})
+        assert select_consensus_features(0.0, 10, a, b) == []
 
     def test_no_partitions_returns_empty(self) -> None:
-        assert intersect_significant_features(0.05) == []
+        assert select_consensus_features(0.05, 10) == []
 
     def test_intersection_is_empty_when_disjoint(self) -> None:
-        a = self._scores({"x": 0.01})
-        b = self._scores({"y": 0.01})
-        result = intersect_significant_features(0.05, a, b)
-        assert result == []
+        a = self._scores({"x": (0.01, 0.5)})
+        b = self._scores({"y": (0.01, 0.5)})
+        assert select_consensus_features(0.05, 10, a, b) == []
+
+    def test_negative_n_selected_raises(self) -> None:
+        a = self._scores({"x": (0.01, 0.5)})
+        with pytest.raises(ValueError, match="n_selected must be positive"):
+            select_consensus_features(0.05, -1, a)
+
+    def test_zero_n_selected_raises(self) -> None:
+        a = self._scores({"x": (0.01, 0.5)})
+        with pytest.raises(ValueError, match="n_selected must be positive"):
+            select_consensus_features(0.05, 0, a)

@@ -1,17 +1,19 @@
 """Clustering agreement pipeline.
 
-Input: per-partition feature embeddings and per-partition labels/strata.
+Input: per-partition feature tables and per-partition labels/strata.
 Method: run a Kruskal-Wallis H-test on every feature (against the labels
-    as the grouping variable), Benjamini-Hochberg-adjust the p-values
-    within each partition, then take the intersection of significant
-    features (p_adj < threshold) across partitions.
-Output: per-partition feature significance tables and a list of feature
-    names significant in every partition.
+    as the grouping variable) for p-values and eta-squared effect sizes,
+    Benjamini-Hochberg-adjust the p-values within each partition, select
+    the top ``n_selected`` features per partition by eta-squared among the
+    FDR survivors (p_adj < threshold), and take the intersection of the
+    per-partition selections as the consensus feature set.
+Output: per-partition feature significance tables and the consensus list
+    of feature names prioritized in every partition.
 """
 
 from kedro.pipeline import Pipeline, node
 
-from .nodes import intersect_significant_features, kruskal_wallis_per_feature
+from .nodes import kruskal_wallis_per_feature, select_consensus_features
 
 
 def create_pipeline(partition_ids: list[str]) -> Pipeline:
@@ -30,9 +32,10 @@ def create_pipeline(partition_ids: list[str]) -> Pipeline:
     ]
     pipeline_nodes.append(
         node(
-            func=intersect_significant_features,
+            func=select_consensus_features,
             inputs=[
                 "params:clustering_agreement.p_adj_threshold",
+                "params:clustering_agreement.n_selected",
                 *[f"feature_significance__{pid}" for pid in partition_ids],
             ],
             outputs="clustering_agreement_features",

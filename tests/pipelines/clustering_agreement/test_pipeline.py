@@ -31,9 +31,10 @@ class TestCreatePipeline:
                 "params:clustering_agreement.n_features",
             ]
 
-        intersection_node = by_output["clustering_agreement_features"]
-        assert list(intersection_node.inputs) == [
+        consensus_node = by_output["clustering_agreement_features"]
+        assert list(consensus_node.inputs) == [
             "params:clustering_agreement.p_adj_threshold",
+            "params:clustering_agreement.n_selected",
             "feature_significance__part1",
             "feature_significance__part2",
         ]
@@ -44,4 +45,5 @@ class TestCreatePipeline:
         assert pipeline.nodes[0].outputs == ["clustering_agreement_features"]
         assert list(pipeline.nodes[0].inputs) == [
             "params:clustering_agreement.p_adj_threshold",
+            "params:clustering_agreement.n_selected",
         ]

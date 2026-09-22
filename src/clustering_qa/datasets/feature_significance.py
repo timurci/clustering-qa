@@ -9,14 +9,22 @@ from kedro.io import AbstractDataset
 
 from clustering_qa.datasets.base import AnnotatedDataFrame
 
+# Intentionally limited to 3 decimals: reporting granularity finer than
+# "<0.001" is not used downstream, and full precision inflates the CSVs
+# without adding information.
 CSV_FLOAT_PRECISION = 3
 
 
 @dataclass(frozen=True)
 class FeatureSignificance(AnnotatedDataFrame):
-    """Represents per-feature significance scores from a Kruskal-Wallis test."""
+    """Per-feature significance scores and effect sizes from a Kruskal-Wallis test."""
 
-    required_columns: ClassVar[tuple[str, ...]] = ("feature", "p_value", "p_adj")
+    required_columns: ClassVar[tuple[str, ...]] = (
+        "feature",
+        "p_value",
+        "p_adj",
+        "eta_squared",
+    )
 
 
 class FeatureSignificanceDataset(
