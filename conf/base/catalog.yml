@@ -37,3 +37,7 @@
 "clustering_agreement_features":
   type: json.JSONDataset
   filepath: data/08_reporting/clustering_agreement_features.json
+
+"clustering_agreement_report":
+  type: kedro_datasets.text.TextDataset
+  filepath: data/08_reporting/clustering_agreement_report.md

@@ -11,6 +11,7 @@ from clustering_qa.datasets.feature_significance import FeatureSignificance
 from clustering_qa.datasets.feature_table import FeatureTable, SampleLabels
 
 _MIN_GROUPS_FOR_KRUSKAL = 2
+_REPORT_FDR_THRESHOLDS = (0.05, 0.01, 0.001)
 
 
 def kruskal_wallis_per_feature(
@@ -135,6 +136,90 @@ def _select_top_features(
         "feature"
     ].to_list()
     return set(ranked[:n_selected])
+
+
+def clustering_agreement_report(
+    partition_ids: list[str],
+    p_adj_threshold: float,
+    n_selected: int,
+    *partition_scores: FeatureSignificance,
+) -> str:
+    """Render a markdown summary report of the clustering agreement run.
+
+    The report contains the significant gene counts per partition (``p_adj``
+    below each of 0.05, 0.01, 0.001), the total number of tested genes, the
+    selection parameters, and the hypothetical consensus sizes obtained by
+    intersecting the significant gene sets at each threshold.
+
+    Args:
+        partition_ids: Partition names, order-matched to ``partition_scores``.
+        p_adj_threshold: Selection FDR threshold used for the consensus.
+        n_selected: Maximum number of features selected per partition.
+        partition_scores: One :class:`FeatureSignificance` per partition.
+
+    Returns:
+        The report as a markdown string.
+    """
+    if len(partition_ids) != len(partition_scores):
+        msg = (
+            f"got {len(partition_ids)} partition ids for "
+            f"{len(partition_scores)} score tables"
+        )
+        raise ValueError(msg)
+
+    per_partition = [
+        {
+            threshold: set(
+                scores.data.filter(pl.col("p_adj") < threshold)["feature"].to_list()
+            )
+            for threshold in _REPORT_FDR_THRESHOLDS
+        }
+        for scores in partition_scores
+    ]
+    consensus = {
+        threshold: (
+            set.intersection(*(sets[threshold] for sets in per_partition))
+            if per_partition
+            else set()
+        )
+        for threshold in _REPORT_FDR_THRESHOLDS
+    }
+    total_genes = partition_scores[0].data.height if partition_scores else 0
+    threshold_labels = [f"FDR < {t}" for t in _REPORT_FDR_THRESHOLDS]
+
+    lines = [
+        "# Clustering agreement report",
+        "",
+        "## Run parameters",
+        "",
+        f"- Total genes tested per cohort: {total_genes}",
+        f"- Max genes selected per cohort (`n_selected`): {n_selected}",
+        f"- Selection FDR threshold (`p_adj_threshold`): {p_adj_threshold}",
+        "",
+        "## Significant genes per cohort",
+        "",
+        "| Cohort | " + " | ".join(threshold_labels) + " |",
+        "| --- | " + " | ".join("---" for _ in _REPORT_FDR_THRESHOLDS) + " |",
+    ]
+    for pid, counts in zip(partition_ids, per_partition, strict=True):
+        cells = " | ".join(str(len(counts[t])) for t in _REPORT_FDR_THRESHOLDS)
+        lines.append(f"| {pid} | {cells} |")
+    lines += [
+        "",
+        "## Consensus genes by FDR threshold",
+        "",
+        "Intersection of the significant gene sets across cohorts. Hypothetical:",
+        "the consensus output selects the top `n_selected` genes per cohort by",
+        "eta-squared instead.",
+        "",
+        "| Threshold | Consensus genes |",
+        "| --- | --- |",
+    ]
+    lines += [
+        f"| {label} | {len(consensus[t])} |"
+        for t, label in zip(_REPORT_FDR_THRESHOLDS, threshold_labels, strict=True)
+    ]
+    return "\n".join(lines) + "\n"
 
 
 def _kruskal_test(

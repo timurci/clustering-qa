@@ -15,8 +15,8 @@ class TestCreatePipeline:
     def test_node_count_matches_partitions(self) -> None:
         partition_ids = ["part1", "part2", "part3"]
         pipeline = create_pipeline(partition_ids)
-        # One KW node per partition plus a single intersection node.
-        assert len(pipeline.nodes) == len(partition_ids) + 1
+        # One KW node per partition plus a consensus node and a report node.
+        assert len(pipeline.nodes) == len(partition_ids) + 2
 
     def test_node_names_and_io(self) -> None:
         partition_ids = ["part1", "part2"]
@@ -39,11 +39,29 @@ class TestCreatePipeline:
             "feature_significance__part2",
         ]
 
-    def test_empty_partition_list_produces_only_intersection_node(self) -> None:
+        report_node = by_output["clustering_agreement_report"]
+        assert list(report_node.inputs) == [
+            "params:partition_ids",
+            "params:clustering_agreement.p_adj_threshold",
+            "params:clustering_agreement.n_selected",
+            "feature_significance__part1",
+            "feature_significance__part2",
+        ]
+
+    def test_empty_partition_list_produces_only_aggregate_nodes(self) -> None:
         pipeline = create_pipeline([])
-        assert len(pipeline.nodes) == 1
-        assert pipeline.nodes[0].outputs == ["clustering_agreement_features"]
-        assert list(pipeline.nodes[0].inputs) == [
+        assert len(pipeline.nodes) == 2
+        by_output = self._nodes_by_output(pipeline)
+        assert set(by_output) == {
+            "clustering_agreement_features",
+            "clustering_agreement_report",
+        }
+        assert list(by_output["clustering_agreement_features"].inputs) == [
+            "params:clustering_agreement.p_adj_threshold",
+            "params:clustering_agreement.n_selected",
+        ]
+        assert list(by_output["clustering_agreement_report"].inputs) == [
+            "params:partition_ids",
             "params:clustering_agreement.p_adj_threshold",
             "params:clustering_agreement.n_selected",
         ]

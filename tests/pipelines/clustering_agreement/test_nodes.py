@@ -10,6 +10,7 @@ import pytest
 from clustering_qa.datasets.feature_significance import FeatureSignificance
 from clustering_qa.datasets.feature_table import FeatureTable, SampleLabels
 from clustering_qa.pipelines.clustering_agreement.nodes import (
+    clustering_agreement_report,
     kruskal_wallis_per_feature,
     select_consensus_features,
 )
@@ -220,58 +221,86 @@ class TestKruskalWallisPerFeature:
             kruskal_wallis_per_feature(features, labels, n_features=0)
 
 
+def _scores(rows: dict[str, tuple[float, float]]) -> FeatureSignificance:
+    """Builds scores from ``feature -> (p_adj, eta_squared)``."""
+    return FeatureSignificance(
+        data=pl.DataFrame(
+            {
+                "feature": list(rows),
+                "p_value": [p for p, _ in rows.values()],
+                "p_adj": [p for p, _ in rows.values()],
+                "eta_squared": [e for _, e in rows.values()],
+            }
+        )
+    )
+
+
 class TestSelectConsensusFeatures:
     """Tests for the ``select_consensus_features`` node function."""
 
-    @staticmethod
-    def _scores(rows: dict[str, tuple[float, float]]) -> FeatureSignificance:
-        """Builds scores from ``feature -> (p_adj, eta_squared)``."""
-        return FeatureSignificance(
-            data=pl.DataFrame(
-                {
-                    "feature": list(rows),
-                    "p_value": [p for p, _ in rows.values()],
-                    "p_adj": [p for p, _ in rows.values()],
-                    "eta_squared": [e for _, e in rows.values()],
-                }
-            )
-        )
-
     def test_selects_top_eta_per_partition_and_intersects(self) -> None:
-        a = self._scores({"x": (0.01, 0.5), "y": (0.01, 0.4), "z": (0.01, 0.1)})
-        b = self._scores({"x": (0.01, 0.3), "y": (0.01, 0.2), "w": (0.01, 0.9)})
+        a = _scores({"x": (0.01, 0.5), "y": (0.01, 0.4), "z": (0.01, 0.1)})
+        b = _scores({"x": (0.01, 0.3), "y": (0.01, 0.2), "w": (0.01, 0.9)})
         # Top-2 per partition: a -> {x, y}; b -> {w, x}.
         assert select_consensus_features(0.05, 2, a, b) == ["x"]
 
     def test_fdr_gate_excludes_nonsignificant(self) -> None:
-        a = self._scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
-        b = self._scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
+        a = _scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
+        b = _scores({"x": (0.01, 0.5), "y": (0.2, 0.9)})
         assert select_consensus_features(0.05, 10, a, b) == ["x"]
 
     def test_underfill_keeps_all_survivors(self) -> None:
-        a = self._scores({"x": (0.01, 0.5), "y": (0.02, 0.4)})
-        b = self._scores({"x": (0.01, 0.3), "y": (0.02, 0.2)})
+        a = _scores({"x": (0.01, 0.5), "y": (0.02, 0.4)})
+        b = _scores({"x": (0.01, 0.3), "y": (0.02, 0.2)})
         assert select_consensus_features(0.05, 2000, a, b) == ["x", "y"]
 
     def test_threshold_zero_returns_empty(self) -> None:
-        a = self._scores({"x": (0.5, 0.5)})
-        b = self._scores({"x": (0.5, 0.5)})
+        a = _scores({"x": (0.5, 0.5)})
+        b = _scores({"x": (0.5, 0.5)})
         assert select_consensus_features(0.0, 10, a, b) == []
 
     def test_no_partitions_returns_empty(self) -> None:
         assert select_consensus_features(0.05, 10) == []
 
     def test_intersection_is_empty_when_disjoint(self) -> None:
-        a = self._scores({"x": (0.01, 0.5)})
-        b = self._scores({"y": (0.01, 0.5)})
+        a = _scores({"x": (0.01, 0.5)})
+        b = _scores({"y": (0.01, 0.5)})
         assert select_consensus_features(0.05, 10, a, b) == []
 
     def test_negative_n_selected_raises(self) -> None:
-        a = self._scores({"x": (0.01, 0.5)})
+        a = _scores({"x": (0.01, 0.5)})
         with pytest.raises(ValueError, match="n_selected must be positive"):
             select_consensus_features(0.05, -1, a)
 
     def test_zero_n_selected_raises(self) -> None:
-        a = self._scores({"x": (0.01, 0.5)})
+        a = _scores({"x": (0.01, 0.5)})
         with pytest.raises(ValueError, match="n_selected must be positive"):
             select_consensus_features(0.05, 0, a)
+
+
+class TestClusteringAgreementReport:
+    """Tests for the ``clustering_agreement_report`` node function."""
+
+    def test_renders_counts_totals_and_consensus_sizes(self) -> None:
+        a = _scores({"x": (0.0005, 0.5), "y": (0.005, 0.4), "z": (0.04, 0.1)})
+        b = _scores({"x": (0.0005, 0.5), "y": (0.02, 0.2), "w": (0.3, 0.9)})
+        report = clustering_agreement_report(["a", "b"], 0.05, 2000, a, b)
+        assert "| a | 3 | 2 | 1 |" in report
+        assert "| b | 2 | 1 | 1 |" in report
+        assert "- Total genes tested per cohort: 3" in report
+        assert "- Max genes selected per cohort (`n_selected`): 2000" in report
+        assert "- Selection FDR threshold (`p_adj_threshold`): 0.05" in report
+        # Consensus: {x, y} at 0.05, {x} at 0.01, {x} at 0.001.
+        assert "| FDR < 0.05 | 2 |" in report
+        assert "| FDR < 0.01 | 1 |" in report
+        assert "| FDR < 0.001 | 1 |" in report
+
+    def test_renders_empty_run(self) -> None:
+        report = clustering_agreement_report([], 0.05, 10)
+        assert "| Cohort | FDR < 0.05 | FDR < 0.01 | FDR < 0.001 |" in report
+        assert "| Threshold | Consensus genes |" in report
+
+    def test_partition_id_mismatch_raises(self) -> None:
+        a = _scores({"x": (0.0005, 0.5)})
+        with pytest.raises(ValueError, match="partition ids"):
+            clustering_agreement_report(["a", "b"], 0.05, 10, a)
