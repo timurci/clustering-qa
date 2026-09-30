@@ -295,9 +295,35 @@ class TestClusteringAgreementReport:
         assert "| FDR < 0.01 | 1 |" in report
         assert "| FDR < 0.001 | 1 |" in report
 
+    def test_renders_eta_squared_summary_per_cohort(self) -> None:
+        a = _scores({"x": (0.0005, 0.5), "y": (0.005, 0.4), "z": (0.04, 0.1)})
+        b = _scores({"x": (0.0005, 0.2), "y": (0.02, 0.1)})
+        report = clustering_agreement_report(["a", "b"], 0.05, 2000, a, b)
+        assert "| Cohort | Min | Max | Median | Mean | 25p | 75p | Variance |" in report
+        assert "| a | 0.1 | 0.5 | 0.4 | 0.333333 | 0.25 | 0.45 | 0.0288889 |" in report
+        assert "| b | 0.1 | 0.2 | 0.15 | 0.15 | 0.125 | 0.175 | 0.0025 |" in report
+
+    def test_eta_squared_summary_skips_nonfinite_values(self) -> None:
+        a = _scores(
+            {
+                "x": (0.0005, 0.5),
+                "y": (0.005, float("nan")),
+                "z": (0.04, float("nan")),
+            }
+        )
+        report = clustering_agreement_report(["a"], 0.05, 2000, a)
+        # Statistics span the single finite eta-squared only.
+        assert "| a | 0.5 | 0.5 | 0.5 | 0.5 | 0.5 | 0.5 | 0 |" in report
+
+    def test_eta_squared_summary_all_nonfinite_is_na(self) -> None:
+        a = _scores({"x": (0.0005, float("nan"))})
+        report = clustering_agreement_report(["a"], 0.05, 2000, a)
+        assert "| a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |" in report
+
     def test_renders_empty_run(self) -> None:
         report = clustering_agreement_report([], 0.05, 10)
         assert "| Cohort | FDR < 0.05 | FDR < 0.01 | FDR < 0.001 |" in report
+        assert "| Cohort | Min | Max | Median | Mean | 25p | 75p | Variance |" in report
         assert "| Threshold | Consensus genes |" in report
 
     def test_partition_id_mismatch_raises(self) -> None:

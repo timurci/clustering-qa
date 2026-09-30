@@ -9,7 +9,8 @@ Method: run a Kruskal-Wallis H-test on every feature (against the labels
     per-partition selections as the consensus feature set.
 Output: per-partition feature significance tables, the consensus list of
     feature names prioritized in every partition, and a markdown summary
-    report of significant gene counts.
+    report of significant gene counts and per-cohort eta-squared summary
+    statistics.
 """
 
 from kedro.pipeline import Pipeline, node

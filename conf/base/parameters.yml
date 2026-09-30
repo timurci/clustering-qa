@@ -9,9 +9,9 @@ partition_ids:
 
 clustering_stability:
   n_trials: 20
-  n_clusters: 5
+  n_clusters: 4
 
 clustering_agreement:
   p_adj_threshold: 0.05
-  n_selected: 2000 # max features selected per partition after FDR + eta-squared ranking
+  n_selected: 4000 # max features selected per partition after FDR + eta-squared ranking
   n_features: null # null = test all features; set a small value for smoke tests

@@ -12,6 +12,8 @@ from clustering_qa.datasets.feature_table import FeatureTable, SampleLabels
 
 _MIN_GROUPS_FOR_KRUSKAL = 2
 _REPORT_FDR_THRESHOLDS = (0.05, 0.01, 0.001)
+_ETA_FORMAT = ".6g"
+_NA_CELL = "n/a"
 
 
 def kruskal_wallis_per_feature(
@@ -148,7 +150,9 @@ def clustering_agreement_report(
 
     The report contains the significant gene counts per partition (``p_adj``
     below each of 0.05, 0.01, 0.001), the total number of tested genes, the
-    selection parameters, and the hypothetical consensus sizes obtained by
+    selection parameters, per-partition eta-squared summary statistics
+    (min, max, median, mean, 25p, 75p, variance) across all tested
+    features, and the hypothetical consensus sizes obtained by
     intersecting the significant gene sets at each threshold.
 
     Args:
@@ -206,6 +210,20 @@ def clustering_agreement_report(
         lines.append(f"| {pid} | {cells} |")
     lines += [
         "",
+        "## Eta-squared summary per cohort",
+        "",
+        "Descriptive statistics of eta-squared across all tested features per",
+        "cohort, excluding features with non-finite eta-squared. Variance is the",
+        "population variance (ddof=0).",
+        "",
+        "| Cohort | Min | Max | Median | Mean | 25p | 75p | Variance |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for pid, scores in zip(partition_ids, partition_scores, strict=True):
+        cells = " | ".join(_eta_squared_summary_cells(scores))
+        lines.append(f"| {pid} | {cells} |")
+    lines += [
+        "",
         "## Consensus genes by FDR threshold",
         "",
         "Intersection of the significant gene sets across cohorts. Hypothetical:",
@@ -220,6 +238,29 @@ def clustering_agreement_report(
         for t, label in zip(_REPORT_FDR_THRESHOLDS, threshold_labels, strict=True)
     ]
     return "\n".join(lines) + "\n"
+
+
+def _eta_squared_summary_cells(scores: FeatureSignificance) -> list[str]:
+    """Format one cohort's eta-squared summary as report table cells.
+
+    Returns the min, max, median, mean, 25th and 75th percentiles (linear
+    interpolation), and population variance of the finite eta-squared
+    values, each formatted with 6 significant digits; ``n/a`` cells when
+    no feature has a finite eta-squared.
+    """
+    finite = scores.data.filter(pl.col("eta_squared").is_finite())
+    if finite.is_empty():
+        return [_NA_CELL] * 7
+    stats = finite.select(
+        pl.col("eta_squared").min().alias("min"),
+        pl.col("eta_squared").max().alias("max"),
+        pl.col("eta_squared").median().alias("median"),
+        pl.col("eta_squared").mean().alias("mean"),
+        pl.col("eta_squared").quantile(0.25, interpolation="linear").alias("p25"),
+        pl.col("eta_squared").quantile(0.75, interpolation="linear").alias("p75"),
+        pl.col("eta_squared").var(ddof=0).alias("variance"),
+    ).row(0)
+    return [f"{value:{_ETA_FORMAT}}" for value in stats]
 
 
 def _kruskal_test(
