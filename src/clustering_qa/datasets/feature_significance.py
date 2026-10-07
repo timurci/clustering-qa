@@ -17,13 +17,14 @@ CSV_FLOAT_PRECISION = 3
 
 @dataclass(frozen=True)
 class FeatureSignificance(AnnotatedDataFrame):
-    """Per-feature significance scores and effect sizes from a Kruskal-Wallis test."""
+    """Per-feature significance and pairwise fold-change effect sizes."""
 
     required_columns: ClassVar[tuple[str, ...]] = (
         "feature",
         "p_value",
         "p_adj",
-        "eta_squared",
+        "min_gap",
+        "max_gap",
     )
 
 

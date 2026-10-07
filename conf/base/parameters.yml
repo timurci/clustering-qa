@@ -13,5 +13,16 @@ clustering_stability:
 
 clustering_agreement:
   p_adj_threshold: 0.05
-  n_selected: 4000 # max features selected per partition after FDR + eta-squared ranking
   n_features: null # null = test all features; set a small value for smoke tests
+  # Minimum pairwise fold-change gap: a feature is selected when its
+  # shrunken lower confidence bound reaches this in the global figure
+  # (min_gap, every cluster pair separated) or the local figure (max_gap,
+  # at least one pair separated). In log2 units: 0.585 is a 1.5-fold gap.
+  lfc_gap_threshold: 0.585
+
+deseq2_clustering_agreement:
+  # uvr project holding run_deseq2_lrt.R, relative to the Kedro project root.
+  r_project: r/deseq2_clustering_agreement
+  # Workers for the per-gene DESeq2 fits; null = one fewer than the detected
+  # cores, capped at 8.
+  nproc: null

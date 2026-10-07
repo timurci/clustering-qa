@@ -1,7 +1,7 @@
 # Here you can define all your datasets by using simple YAML syntax.
 #
 # Documentation for this file format can be found in "The Data Catalog"
-# Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#data-catalog
+# Link: https://docs.kedro.org/en/stable/catalog-data/introduction/#the-data-catalog
 
 # Per-partition / per-trial dataset factory patterns.
 # The pipeline uses `__` as the separator (instead of `.`) to avoid the
@@ -30,14 +30,38 @@
   type: json.JSONDataset
   filepath: data/08_reporting/clustering_stability_metrics/{pid}.json
 
+# Outputs of the clustering_agreement pipeline.
 "feature_significance__{pid}":
   type: clustering_qa.datasets.feature_significance.FeatureSignificanceDataset
-  filepath: data/08_reporting/feature_significance/{pid}.csv
+  filepath: data/08_reporting/clustering_agreement/feature_significance/{pid}.csv
 
-"clustering_agreement_features":
+"clustering_agreement_features_global":
   type: json.JSONDataset
-  filepath: data/08_reporting/clustering_agreement_features.json
+  filepath: data/08_reporting/clustering_agreement/clustering_agreement_features_global.json
+
+"clustering_agreement_features_local":
+  type: json.JSONDataset
+  filepath: data/08_reporting/clustering_agreement/clustering_agreement_features_local.json
 
 "clustering_agreement_report":
   type: kedro_datasets.text.TextDataset
-  filepath: data/08_reporting/clustering_agreement_report.md
+  filepath: data/08_reporting/clustering_agreement/clustering_agreement_report.md
+
+"jaccard_summary_report":
+  type: kedro_datasets.text.TextDataset
+  filepath: data/08_reporting/clustering_agreement/jaccard_summary_report.md
+
+"jaccard_plot":
+  type: kedro_datasets.matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/clustering_agreement/jaccard_by_fdr.png
+  overwrite: true
+
+"jaccard_global_plot":
+  type: kedro_datasets.matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/clustering_agreement/jaccard_by_fdr_and_min_gap.png
+  overwrite: true
+
+"jaccard_local_plot":
+  type: kedro_datasets.matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/clustering_agreement/jaccard_by_fdr_and_max_gap.png
+  overwrite: true

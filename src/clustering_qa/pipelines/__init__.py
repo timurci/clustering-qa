@@ -1,5 +1,15 @@
-"""Kedro pipelines for the clustering_qa project."""
+"""Project pipelines."""
 
-from . import clustering_agreement, clustering_stability
+from . import (
+    clustering_agreement,
+    clustering_agreement_summary,
+    clustering_stability,
+    deseq2_clustering_agreement,
+)
 
-__all__ = ["clustering_agreement", "clustering_stability"]
+__all__ = [
+    "clustering_agreement",
+    "clustering_agreement_summary",
+    "clustering_stability",
+    "deseq2_clustering_agreement",
+]

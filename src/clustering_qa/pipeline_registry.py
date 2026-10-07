@@ -19,12 +19,16 @@ def register_pipelines() -> dict[str, Pipeline]:
     conf_loader = OmegaConfigLoader(conf_source=conf_path)
     parameters = conf_loader["parameters"]
 
+    partition_ids = parameters["partition_ids"]
+
     clustering_stability = pipelines.clustering_stability.create_pipeline(
-        partition_ids=parameters["partition_ids"],
+        partition_ids=partition_ids,
         n_trials=parameters["clustering_stability"]["n_trials"],
     )
-    clustering_agreement = pipelines.clustering_agreement.create_pipeline(
-        partition_ids=parameters["partition_ids"],
+    clustering_agreement = pipelines.deseq2_clustering_agreement.create_pipeline(
+        partition_ids=partition_ids,
+    ) + pipelines.clustering_agreement_summary.create_pipeline(
+        partition_ids=partition_ids,
     )
     pipeline_dict: dict[str, Pipeline] = {
         "clustering_stability": clustering_stability,

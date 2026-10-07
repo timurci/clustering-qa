@@ -1,8 +1,8 @@
-"""Structural tests for the clustering_agreement pipeline."""
+"""Structural tests for the deseq2_clustering_agreement pipeline."""
 
 from kedro.pipeline import Node, Pipeline
 
-from clustering_qa.pipelines.clustering_agreement import create_pipeline
+from clustering_qa.pipelines.deseq2_clustering_agreement import create_pipeline
 
 
 class TestCreatePipeline:
@@ -15,8 +15,8 @@ class TestCreatePipeline:
     def test_node_count_matches_partitions(self) -> None:
         partition_ids = ["part1", "part2", "part3"]
         pipeline = create_pipeline(partition_ids)
-        # One KW node per partition plus a consensus node and a report node.
-        assert len(pipeline.nodes) == len(partition_ids) + 2
+        # One DESeq2 node per partition plus a consensus node.
+        assert len(pipeline.nodes) == len(partition_ids) + 1
 
     def test_node_names_and_io(self) -> None:
         partition_ids = ["part1", "part2"]
@@ -28,40 +28,33 @@ class TestCreatePipeline:
             assert list(node.inputs) == [
                 f"raw_clustering_features__{pid}",
                 f"raw_clustering_labels__{pid}",
+                "params:clustering_agreement.p_adj_threshold",
                 "params:clustering_agreement.n_features",
+                "params:deseq2_clustering_agreement.r_project",
+                "params:deseq2_clustering_agreement.nproc",
             ]
 
-        consensus_node = by_output["clustering_agreement_features"]
+        consensus_node = next(n for n in pipeline.nodes if len(n.outputs) == 2)
         assert list(consensus_node.inputs) == [
             "params:clustering_agreement.p_adj_threshold",
-            "params:clustering_agreement.n_selected",
+            "params:clustering_agreement.lfc_gap_threshold",
             "feature_significance__part1",
             "feature_significance__part2",
         ]
-
-        report_node = by_output["clustering_agreement_report"]
-        assert list(report_node.inputs) == [
-            "params:partition_ids",
-            "params:clustering_agreement.p_adj_threshold",
-            "params:clustering_agreement.n_selected",
-            "feature_significance__part1",
-            "feature_significance__part2",
+        assert list(consensus_node.outputs) == [
+            "clustering_agreement_features_global",
+            "clustering_agreement_features_local",
         ]
 
     def test_empty_partition_list_produces_only_aggregate_nodes(self) -> None:
         pipeline = create_pipeline([])
-        assert len(pipeline.nodes) == 2
-        by_output = self._nodes_by_output(pipeline)
-        assert set(by_output) == {
-            "clustering_agreement_features",
-            "clustering_agreement_report",
-        }
-        assert list(by_output["clustering_agreement_features"].inputs) == [
-            "params:clustering_agreement.p_adj_threshold",
-            "params:clustering_agreement.n_selected",
+        assert len(pipeline.nodes) == 1
+        consensus_node = pipeline.nodes[0]
+        assert list(consensus_node.outputs) == [
+            "clustering_agreement_features_global",
+            "clustering_agreement_features_local",
         ]
-        assert list(by_output["clustering_agreement_report"].inputs) == [
-            "params:partition_ids",
+        assert list(consensus_node.inputs) == [
             "params:clustering_agreement.p_adj_threshold",
-            "params:clustering_agreement.n_selected",
+            "params:clustering_agreement.lfc_gap_threshold",
         ]

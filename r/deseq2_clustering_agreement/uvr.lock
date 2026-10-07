@@ -1,0 +1,598 @@
+[r]
+version = "4.5.3"
+bioc_version = "3.22"
+
+[[package]]
+name = "BH"
+version = "1.90.0-4.1"
+source = "cran"
+raw_version = "1.90.0-1"
+url = "https://cran.r-project.org/src/contrib/BH_1.90.0-1.tar.gz"
+checksum = "md5:4b82aea7c6223ea0048c3edbe1a2caa0"
+
+[[package]]
+name = "Biobase"
+version = "2.70.0"
+source = "bioconductor"
+raw_version = "2.70.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/Biobase_2.70.0.tar.gz"
+checksum = "md5:1972f4f090998033acd1d3bfdec77961"
+requires = ["BiocGenerics"]
+
+[[package]]
+name = "BiocGenerics"
+version = "0.56.0"
+source = "bioconductor"
+raw_version = "0.56.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/BiocGenerics_0.56.0.tar.gz"
+checksum = "md5:5d6a2059f5c9559acfd2bd95d0db93bf"
+requires = ["generics"]
+
+[[package]]
+name = "BiocParallel"
+version = "1.44.0"
+source = "bioconductor"
+raw_version = "1.44.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/BiocParallel_1.44.0.tar.gz"
+checksum = "md5:75ab7c6895d7c10cbf15f4335adc6f08"
+requires = [
+    "futile.logger",
+    "snow",
+    "codetools",
+    "BH",
+    "cpp11",
+]
+
+[[package]]
+name = "DESeq2"
+version = "1.50.2"
+source = "bioconductor"
+raw_version = "1.50.2"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/DESeq2_1.50.2.tar.gz"
+checksum = "md5:25808f3c95fae4e5a1e0baa8e8035e6e"
+requires = [
+    "S4Vectors",
+    "IRanges",
+    "GenomicRanges",
+    "SummarizedExperiment",
+    "BiocGenerics",
+    "Biobase",
+    "BiocParallel",
+    "matrixStats",
+    "locfit",
+    "ggplot2",
+    "Rcpp",
+    "MatrixGenerics",
+    "Rcpp",
+    "RcppArmadillo",
+]
+
+[[package]]
+name = "DelayedArray"
+version = "0.36.1"
+source = "bioconductor"
+raw_version = "0.36.1"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/DelayedArray_0.36.1.tar.gz"
+checksum = "md5:5a2d055332ae873b2a2c4e4a7b9cfe0f"
+requires = [
+    "Matrix",
+    "BiocGenerics",
+    "MatrixGenerics",
+    "S4Vectors",
+    "IRanges",
+    "S4Arrays",
+    "SparseArray",
+]
+
+[[package]]
+name = "GenomicRanges"
+version = "1.62.1"
+source = "bioconductor"
+raw_version = "1.62.1"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/GenomicRanges_1.62.1.tar.gz"
+checksum = "md5:aa38e9c50dd8981e4db04cc5beee8078"
+requires = [
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+    "Seqinfo",
+    "S4Vectors",
+    "IRanges",
+]
+
+[[package]]
+name = "IRanges"
+version = "2.44.0"
+source = "bioconductor"
+raw_version = "2.44.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/IRanges_2.44.0.tar.gz"
+checksum = "md5:a169fe4941da3987cebbd383aa9b30f3"
+requires = [
+    "BiocGenerics",
+    "S4Vectors",
+    "S4Vectors",
+]
+
+[[package]]
+name = "Matrix"
+version = "1.7.6"
+source = "cran"
+raw_version = "1.7-6"
+url = "https://cran.r-project.org/src/contrib/Matrix_1.7-6.tar.gz"
+checksum = "md5:92502b5e17bc36390d9e52c0f2c2e0f0"
+requires = ["lattice"]
+
+[[package]]
+name = "MatrixGenerics"
+version = "1.22.0"
+source = "bioconductor"
+raw_version = "1.22.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/MatrixGenerics_1.22.0.tar.gz"
+checksum = "md5:f1d0d731b82aed99d77e403280a14deb"
+requires = ["matrixStats"]
+
+[[package]]
+name = "R6"
+version = "2.6.1"
+source = "cran"
+raw_version = "2.6.1"
+url = "https://cran.r-project.org/src/contrib/R6_2.6.1.tar.gz"
+checksum = "md5:f01b1787f12797c29194d63c9afd5d70"
+
+[[package]]
+name = "RColorBrewer"
+version = "1.1.3"
+source = "cran"
+raw_version = "1.1-3"
+url = "https://cran.r-project.org/src/contrib/RColorBrewer_1.1-3.tar.gz"
+checksum = "md5:9b687595bbe02a7e43fc195ba33f065c"
+
+[[package]]
+name = "Rcpp"
+version = "1.1.2"
+source = "cran"
+raw_version = "1.1.2"
+url = "https://cran.r-project.org/src/contrib/Rcpp_1.1.2.tar.gz"
+checksum = "md5:353d35176db9c570705a0a324c06fdca"
+
+[[package]]
+name = "RcppArmadillo"
+version = "15.6.0-4.1"
+source = "cran"
+raw_version = "15.6.0-1"
+url = "https://cran.r-project.org/src/contrib/RcppArmadillo_15.6.0-1.tar.gz"
+checksum = "md5:d5d06c2aead5474086d2b12b145efd70"
+requires = [
+    "Rcpp",
+    "Rcpp",
+]
+
+[[package]]
+name = "S4Arrays"
+version = "1.10.1"
+source = "bioconductor"
+raw_version = "1.10.1"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/S4Arrays_1.10.1.tar.gz"
+checksum = "md5:d0b20bea4bc0a9eb10e75c929c19fcf2"
+requires = [
+    "Matrix",
+    "abind",
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+    "S4Vectors",
+]
+
+[[package]]
+name = "S4Vectors"
+version = "0.48.1"
+source = "bioconductor"
+raw_version = "0.48.1"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/S4Vectors_0.48.1.tar.gz"
+checksum = "md5:97d42c8c8d6bf44fd95675b48dc66d1e"
+requires = ["BiocGenerics"]
+
+[[package]]
+name = "S7"
+version = "0.2.2"
+source = "cran"
+raw_version = "0.2.2"
+url = "https://cran.r-project.org/src/contrib/S7_0.2.2.tar.gz"
+checksum = "md5:6a40d3eae470be0f06a03737b9391269"
+
+[[package]]
+name = "SQUAREM"
+version = "2026.1.0"
+source = "cran"
+raw_version = "2026.1"
+url = "https://cran.r-project.org/src/contrib/SQUAREM_2026.1.tar.gz"
+checksum = "md5:68b53e23af8ed1833fc59995289acd98"
+
+[[package]]
+name = "Seqinfo"
+version = "1.0.0"
+source = "bioconductor"
+raw_version = "1.0.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/Seqinfo_1.0.0.tar.gz"
+checksum = "md5:10585f976146cbcf32a4ce7d46a18709"
+requires = [
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+]
+
+[[package]]
+name = "SparseArray"
+version = "1.10.10"
+source = "bioconductor"
+raw_version = "1.10.10"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/SparseArray_1.10.10.tar.gz"
+checksum = "md5:632b664e19a2121c50cacf14f0de6fe1"
+requires = [
+    "Matrix",
+    "BiocGenerics",
+    "MatrixGenerics",
+    "S4Vectors",
+    "S4Arrays",
+    "matrixStats",
+    "IRanges",
+    "XVector",
+    "S4Vectors",
+    "IRanges",
+    "XVector",
+]
+
+[[package]]
+name = "SummarizedExperiment"
+version = "1.40.0"
+source = "bioconductor"
+raw_version = "1.40.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/SummarizedExperiment_1.40.0.tar.gz"
+checksum = "md5:f983c78496375a418ccd4853f966d9a8"
+requires = [
+    "MatrixGenerics",
+    "GenomicRanges",
+    "Biobase",
+    "Matrix",
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+    "Seqinfo",
+    "S4Arrays",
+    "DelayedArray",
+]
+
+[[package]]
+name = "XVector"
+version = "0.50.0"
+source = "bioconductor"
+raw_version = "0.50.0"
+url = "https://bioconductor.org/packages/3.22/bioc/src/contrib/XVector_0.50.0.tar.gz"
+checksum = "md5:929b5a997ee6325853057c28ca3df77d"
+requires = [
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+    "BiocGenerics",
+    "S4Vectors",
+    "IRanges",
+    "S4Vectors",
+    "IRanges",
+]
+
+[[package]]
+name = "abind"
+version = "1.4.8"
+source = "cran"
+raw_version = "1.4-8"
+url = "https://cran.r-project.org/src/contrib/abind_1.4-8.tar.gz"
+checksum = "md5:7a440111cd1e24356d558ac55a65dc98"
+
+[[package]]
+name = "ashr"
+version = "2.2.63"
+source = "cran"
+raw_version = "2.2-63"
+url = "https://cran.r-project.org/src/contrib/ashr_2.2-63.tar.gz"
+checksum = "md5:9695c659d7d8a5b718679142a25a9dab"
+requires = [
+    "Matrix",
+    "Rcpp",
+    "truncnorm",
+    "mixsqp",
+    "SQUAREM",
+    "etrunct",
+    "invgamma",
+    "Rcpp",
+]
+
+[[package]]
+name = "cli"
+version = "3.6.6"
+source = "cran"
+raw_version = "3.6.6"
+url = "https://cran.r-project.org/src/contrib/cli_3.6.6.tar.gz"
+checksum = "md5:eedc08ba864ae6cd640b05eff1a607ee"
+
+[[package]]
+name = "codetools"
+version = "0.2.20"
+source = "cran"
+raw_version = "0.2-20"
+url = "https://cran.r-project.org/src/contrib/codetools_0.2-20.tar.gz"
+checksum = "md5:b6d2fb49c00a528b04f574892359aa55"
+
+[[package]]
+name = "cpp11"
+version = "0.5.5"
+source = "cran"
+raw_version = "0.5.5"
+url = "https://cran.r-project.org/src/contrib/cpp11_0.5.5.tar.gz"
+checksum = "md5:7c4c3f58ffa7adec25b85d0d99c0d7ed"
+
+[[package]]
+name = "etrunct"
+version = "0.1.0"
+source = "cran"
+raw_version = "0.1"
+url = "https://cran.r-project.org/src/contrib/etrunct_0.1.tar.gz"
+checksum = "md5:3cbbc3b93874a20f653c2216cbc95030"
+
+[[package]]
+name = "farver"
+version = "2.1.2"
+source = "cran"
+raw_version = "2.1.2"
+url = "https://cran.r-project.org/src/contrib/farver_2.1.2.tar.gz"
+checksum = "md5:1fa98878bb985e28d968630c7e7597b6"
+
+[[package]]
+name = "formatR"
+version = "1.14.0"
+source = "cran"
+raw_version = "1.14"
+url = "https://cran.r-project.org/src/contrib/formatR_1.14.tar.gz"
+checksum = "md5:8af25a6fd3fcd575a70800921362e63b"
+
+[[package]]
+name = "futile.logger"
+version = "1.4.9"
+source = "cran"
+raw_version = "1.4.9"
+url = "https://cran.r-project.org/src/contrib/futile.logger_1.4.9.tar.gz"
+checksum = "md5:547e54942e85aaa758590784504b3847"
+requires = [
+    "lambda.r",
+    "futile.options",
+]
+
+[[package]]
+name = "futile.options"
+version = "1.0.1"
+source = "cran"
+raw_version = "1.0.1"
+url = "https://cran.r-project.org/src/contrib/futile.options_1.0.1.tar.gz"
+checksum = "md5:040daac5089839c104ffd0e0fbedb98d"
+
+[[package]]
+name = "generics"
+version = "0.1.4"
+source = "cran"
+raw_version = "0.1.4"
+url = "https://cran.r-project.org/src/contrib/generics_0.1.4.tar.gz"
+checksum = "md5:dda54b65216fe3c53571d2adaddc7461"
+
+[[package]]
+name = "ggplot2"
+version = "4.0.3"
+source = "cran"
+raw_version = "4.0.3"
+url = "https://cran.r-project.org/src/contrib/ggplot2_4.0.3.tar.gz"
+checksum = "md5:c50d6864f6226ed9759e5deaa0a25e7f"
+requires = [
+    "cli",
+    "gtable",
+    "isoband",
+    "lifecycle",
+    "rlang",
+    "S7",
+    "scales",
+    "vctrs",
+    "withr",
+]
+
+[[package]]
+name = "glue"
+version = "1.8.1"
+source = "cran"
+raw_version = "1.8.1"
+url = "https://cran.r-project.org/src/contrib/glue_1.8.1.tar.gz"
+checksum = "md5:24e3cd382f52015c929538a5208d11aa"
+
+[[package]]
+name = "gtable"
+version = "0.3.6"
+source = "cran"
+raw_version = "0.3.6"
+url = "https://cran.r-project.org/src/contrib/gtable_0.3.6.tar.gz"
+checksum = "md5:545f07ada570ec8e3f4b22843974ac6d"
+requires = [
+    "cli",
+    "glue",
+    "lifecycle",
+    "rlang",
+]
+
+[[package]]
+name = "invgamma"
+version = "1.2.0"
+source = "cran"
+raw_version = "1.2"
+url = "https://cran.r-project.org/src/contrib/invgamma_1.2.tar.gz"
+checksum = "md5:7edef60c90d4bbd2786b7c59f394f573"
+
+[[package]]
+name = "irlba"
+version = "2.4.1"
+source = "cran"
+raw_version = "2.4.1"
+url = "https://cran.r-project.org/src/contrib/irlba_2.4.1.tar.gz"
+checksum = "md5:3bd6570ce08a025c0a76c5b1077d51c5"
+requires = [
+    "Matrix",
+    "Matrix",
+]
+
+[[package]]
+name = "isoband"
+version = "0.3.0"
+source = "cran"
+raw_version = "0.3.0"
+url = "https://cran.r-project.org/src/contrib/isoband_0.3.0.tar.gz"
+checksum = "md5:0b811a225740b6e4ae0afcdd64f11407"
+requires = [
+    "cli",
+    "rlang",
+    "cpp11",
+]
+
+[[package]]
+name = "labeling"
+version = "0.4.3"
+source = "cran"
+raw_version = "0.4.3"
+url = "https://cran.r-project.org/src/contrib/labeling_0.4.3.tar.gz"
+checksum = "md5:915e6c823c1d8243641ce97253389f14"
+
+[[package]]
+name = "lambda.r"
+version = "1.2.4"
+source = "cran"
+raw_version = "1.2.4"
+url = "https://cran.r-project.org/src/contrib/lambda.r_1.2.4.tar.gz"
+checksum = "md5:861157dc2fe66ce8ed1e755578a57e47"
+requires = ["formatR"]
+
+[[package]]
+name = "lattice"
+version = "0.23.1"
+source = "cran"
+raw_version = "0.23-1"
+url = "https://cran.r-project.org/src/contrib/lattice_0.23-1.tar.gz"
+checksum = "md5:e449ab6441f74836e93869dd34cdf3ba"
+
+[[package]]
+name = "lifecycle"
+version = "1.0.5"
+source = "cran"
+raw_version = "1.0.5"
+url = "https://cran.r-project.org/src/contrib/lifecycle_1.0.5.tar.gz"
+checksum = "md5:bce35a7a89fe4108f262db3e441cccae"
+requires = [
+    "cli",
+    "rlang",
+]
+
+[[package]]
+name = "locfit"
+version = "1.5.9-4.12"
+source = "cran"
+raw_version = "1.5-9.12"
+url = "https://cran.r-project.org/src/contrib/locfit_1.5-9.12.tar.gz"
+checksum = "md5:358f4fde91d135b36ec2a2331d75393b"
+requires = ["lattice"]
+
+[[package]]
+name = "matrixStats"
+version = "1.5.0"
+source = "cran"
+raw_version = "1.5.0"
+url = "https://cran.r-project.org/src/contrib/matrixStats_1.5.0.tar.gz"
+checksum = "md5:8bece992ad950d8528407acee0bc2d1e"
+
+[[package]]
+name = "mixsqp"
+version = "0.3.54"
+source = "cran"
+raw_version = "0.3-54"
+url = "https://cran.r-project.org/src/contrib/mixsqp_0.3-54.tar.gz"
+checksum = "md5:bd626e590845fdea9184479bbf181d69"
+requires = [
+    "irlba",
+    "Rcpp",
+    "Rcpp",
+    "RcppArmadillo",
+]
+
+[[package]]
+name = "rlang"
+version = "1.3.0"
+source = "cran"
+raw_version = "1.3.0"
+url = "https://cran.r-project.org/src/contrib/rlang_1.3.0.tar.gz"
+checksum = "md5:b52c165e43f4d7fe5cfa15c5c9467ff4"
+
+[[package]]
+name = "scales"
+version = "1.4.0"
+source = "cran"
+raw_version = "1.4.0"
+url = "https://cran.r-project.org/src/contrib/scales_1.4.0.tar.gz"
+checksum = "md5:6dd61123ecc2be3e3777aa77c172261d"
+requires = [
+    "cli",
+    "farver",
+    "glue",
+    "labeling",
+    "lifecycle",
+    "R6",
+    "RColorBrewer",
+    "rlang",
+    "viridisLite",
+]
+
+[[package]]
+name = "snow"
+version = "0.4.4"
+source = "cran"
+raw_version = "0.4-4"
+url = "https://cran.r-project.org/src/contrib/snow_0.4-4.tar.gz"
+checksum = "md5:8a6ded9cae4a175619ad1e33cc31d4b9"
+
+[[package]]
+name = "truncnorm"
+version = "1.0.9"
+source = "cran"
+raw_version = "1.0-9"
+url = "https://cran.r-project.org/src/contrib/truncnorm_1.0-9.tar.gz"
+checksum = "md5:878c944c50c6eeaea3e4e6d9586216d3"
+
+[[package]]
+name = "vctrs"
+version = "0.7.3"
+source = "cran"
+raw_version = "0.7.3"
+url = "https://cran.r-project.org/src/contrib/vctrs_0.7.3.tar.gz"
+checksum = "md5:d99218820f353c359ff59fd46b52ddb3"
+requires = [
+    "cli",
+    "glue",
+    "lifecycle",
+    "rlang",
+]
+
+[[package]]
+name = "viridisLite"
+version = "0.4.3"
+source = "cran"
+raw_version = "0.4.3"
+url = "https://cran.r-project.org/src/contrib/viridisLite_0.4.3.tar.gz"
+checksum = "md5:ecfcfd15db2d5a79c25b9514748762b5"
+
+[[package]]
+name = "withr"
+version = "3.0.3"
+source = "cran"
+raw_version = "3.0.3"
+url = "https://cran.r-project.org/src/contrib/withr_3.0.3.tar.gz"
+checksum = "md5:121bf3699aadb9d1b47d648964b934f8"

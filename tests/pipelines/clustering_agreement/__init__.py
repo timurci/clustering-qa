@@ -1,1 +1,1 @@
-"""Structural tests for the clustering_agreement pipeline."""
+"""Tests for the shared clustering agreement nodes."""

@@ -162,3 +162,6 @@ venv.bak/
 
 # mlflow local runs
 mlruns/*
+
+# local tool profiles
+/.pi
